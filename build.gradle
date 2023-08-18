@@ -21,15 +21,15 @@ repositories {
     mavenCentral()
 }
 
-ext {
-    set('springCloudVersion', "2022.0.1")
-}
-
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
+//ext {
+//    set('springCloudVersion', "2022.0.1")
+//}
+//
+//dependencyManagement {
+//    imports {
+//        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+//    }
+//}
 
 
 
@@ -42,9 +42,9 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.jsoup:jsoup:1.15.3'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'com.google.code.gson:gson'
-    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+//    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
