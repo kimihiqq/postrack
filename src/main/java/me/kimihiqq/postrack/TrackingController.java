@@ -28,10 +28,18 @@ public class TrackingController {
         String result;
         switch (company) {
             case "한진택배":
-                result = trackingService.parseHanjinHtml(htmlResponse);
+                result = trackingService.parseHanjinHtml(htmlResponse,company, trackingNumber);
+                System.out.println("한진택배 호출");
                 break;
             case "대한통운":
-                result = trackingService.parseHanjinHtml(htmlResponse); // 주의: 한진택배 파싱 함수로 바꿀 것
+                result = trackingService.parseDaehanHtml(htmlResponse,company, trackingNumber);
+                System.out.println("대한통운 호출");
+
+                break;
+            case "롯데택배":
+                result = trackingService.parseLotteHtml(htmlResponse,company, trackingNumber);
+                System.out.println("롯데택배 호출");
+
                 break;
             default:
                 throw new IllegalArgumentException("지원되지 않는 택배 회사입니다.");
