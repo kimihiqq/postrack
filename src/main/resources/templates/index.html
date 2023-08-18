@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>택배 추적</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        /* 상태 열의 가운데 정렬을 위한 CSS */
+        .status-column {
+            text-align: center;
+        }
+    </style>
+    <style>
+        .changed {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <select id="company">
+        <option value="한진택배">한진택배</option>
+        <option value="대한통운">대한통운</option>
+        <option value="롯데택배">롯데택배</option>
+    </select>
+    <input type="text" id="trackingNumber" placeholder="송장번호">
+    <button onclick="trackPackage()">추가</button>
+    <button onclick="refreshAll()">새로고침</button> <!-- 전체 새로고침 버튼 추가 -->
+
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>택배사</th>
+        <th>송장번호</th>
+        <th>날짜</th>
+        <th class="status-column">상태</th> <!-- "상태" 열에 class 추가 -->
+        <th></th> <!-- 새로고침 버튼을 위한 헤더 추가 -->
+        <th></th> <!-- 삭제 버튼을 위한 헤더 추가 -->
+    </tr>
+    </thead>
+    <tbody id="trackingTable">
+    </tbody>
+</table>
+
+<script>
+    var trackingData = [];
+
+    // 1시간 마다 택배 상태 갱신.. 현재는 약 3.6초
+    setInterval(refreshAllPackages, 3600);
+    function trackPackage() {
+        var company = $("#company").val();
+        var trackingNumber = $("#trackingNumber").val();
+
+        $.get("/track", { company: company, trackingNumber: trackingNumber }, function(data) {
+            var jsonData = JSON.parse(data);
+            trackingData.push(jsonData); // 배열에 데이터 추가
+
+            // 날짜 열 기준으로 내림차순 정렬
+            trackingData.sort(function(a, b) {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            // 테이블 업데이트
+            updateTable();
+        });
+    }
+
+    function updateTable() {
+        $("#trackingTable").empty();
+        trackingData.forEach(function(data, index) {
+            var row = "<tr><td>" + data.company + "</td><td>" + data.trackingNumber + "</td><td>" + data.date + "</td><td class='status-column " + (data.changed ? "changed" : "") + "'>" + data.status + "</td><td><button onclick='deleteRow(this)'>삭제</button></td></tr>";
+            $("#trackingTable").append(row);
+
+            if (data.changed) {
+                // 24시간 후에 빨간색 제거
+                setTimeout(function() {
+                    data.changed = false;
+                    updateTable();
+                }, 86400000);
+            }
+        });
+    }
+
+    function deleteRow(button) {
+        var row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+
+    function refreshAllPackages() {
+        trackingData.forEach(function(data, index) {
+            $.get("/track", { company: data.company, trackingNumber: data.trackingNumber }, function(newData) {
+                var jsonData = JSON.parse(newData);
+                if (jsonData.status !== data.status || jsonData.date !== data.date) {
+                    jsonData.changed = true; // 상태 변경 표시
+                }
+                trackingData[index] = jsonData; // 갱신된 데이터로 교체
+            });
+        });
+
+        updateTable();
+    }
+</script>
+
+</body>
+</html>
